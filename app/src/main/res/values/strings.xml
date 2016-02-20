@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">MyoCross</string>
     <string name="action_settings">Settings</string>
+    <string name="label_no_traffic">No Traffic Light</string>
+    <string name="label_walk">Its green! You are permitted to cross</string>
+    <string name="label_stop">Please wait if you still love yourself</string>
 </resources>
