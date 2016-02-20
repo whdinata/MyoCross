@@ -11,21 +11,20 @@
     <script>
         var socket = io(); // init connection
 
-        /* RECEIVE Message */
         socket.on('light_switched', function(data) {
-          console.log("light_switched");
+          console.log("light_switched "+data["data"]);
         });
 
         socket.on('button_pressed', function(data) {
-          console.log("button_pressed");
+          console.log("button_pressed "+data["data"]);
         });
     </script>
 
   </head>
 
-  <body>
-    <h1>Traffic Lights</h1>
-  <button onclick="notify_clicked();">Send message to server</button>
-
+  <body style="text-align: center;">
+    <br />
+    <img style="height: 500px;" src="{{ url_for('static', filename='traffic-lights.jpg') }}">
+    <h3 style="display: none;">Button pressed</h3>
   </body>
 </html>

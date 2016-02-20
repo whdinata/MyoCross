@@ -1,10 +1,17 @@
 from flask import Flask
 from flask import render_template, request, redirect, session, url_for, escape, make_response, flash, abort
 import threading
+import json
 
 app = Flask(__name__)
 # (session encryption) keep this really secret:
 app.secret_key = "bnNoqxXSgzoXSOezxpZjb8mrMp5L0L4mJ4o8nRzn"
+
+from flask_socketio import SocketIO, send, emit
+socketio = SocketIO(app)
+
+light_state = 0
+my_thread = threading.Thread()
 
 @app.route('/')
 def index():
@@ -12,19 +19,38 @@ def index():
 
 @app.route('/get_status')
 def get_status():
-	return 
+	return json.dumps({"data":light_state})
 
-from flask_socketio import SocketIO, send, emit
-socketio = SocketIO(app)
+@app.route('/press_button', methods=['POST'])
+def press_button():
+	print("button pressed")
+	global light_state
+	global my_thread
+	light_state = 2 # green
+	# restart timer
+	my_thread.cancel()
+	my_thread = threading.Timer(5.0, switch_light)
+	my_thread.start()
+	socketio.emit('button_pressed', {"data":light_state})
 
-@app.before_first_request
-def switch_light():
-	threading.Timer(5.0, switch_light).start()
-	socketio.emit('light_switched', {})
+# ordinary function
+def switch_light(): 
+	print("switching")
+	global light_state
+	global my_thread
+	light_state = (light_state+1)%3 # change global variable
+	my_thread = threading.Timer(5.0, switch_light) # schedule next switch
+	my_thread.start()
+	socketio.emit('light_switched', {"data":light_state})
+
+@app.route('/debug')
+def debug():
+	return redirect(url_for("press_button"))
 
 # -------------------------------------------------------------------
 
 if __name__ == '__main__':
 	#host='0.0.0.0' only with debug disabled - security risk
-	#app.run(port=8080, debug=True) - don't use this one with sockets
-	socketio.run(app, port=8080, debug=True) # only use this with sockets
+	switch_light()
+	socketio.run(app, port=8080, debug=True)
+	
