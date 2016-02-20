@@ -11,7 +11,8 @@ from flask_socketio import SocketIO, send, emit
 socketio = SocketIO(app)
 
 light_state = 0
-my_thread = threading.Thread()
+my_thread = None
+green_duration = 10
 
 @app.route('/')
 def index():
@@ -19,35 +20,28 @@ def index():
 
 @app.route('/get_status')
 def get_status():
-	col = "amber"
-	if(light_state == 0):
-		col = "red"
-	elif(light_state == 2):
-		col = "green"
-
-	return json.dumps({"state":light_state})
+	return json.dumps({"state": "green" if light_state == 1 else "red"})
 
 @app.route('/press_button', methods=['POST'])
 def press_button():
 	print("button pressed")
 	global light_state
 	global my_thread
-	light_state = 2 # green
+	
 	# restart timer
-	my_thread.cancel()
-	my_thread = threading.Timer(5.0, switch_light)
+	if(my_thread != None):
+		my_thread.cancel()
+	my_thread = threading.Timer(green_duration, switch_light)
 	my_thread.start()
-	socketio.emit('button_pressed', {"data":light_state})
+	light_state = 1 # green
+	socketio.emit('button_pressed', {"data":light_state, "time":green_duration})
 
-# ordinary function
+
 def switch_light(): 
 	print("switching")
 	global light_state
-	global my_thread
-	light_state = (light_state+1)%4 # change global variable
-	my_thread = threading.Timer(5.0, switch_light) # schedule next switch
-	my_thread.start()
-	socketio.emit('light_switched', {"data":light_state})
+	light_state = 0 # red
+
 
 @app.route('/debug')
 def debug():
