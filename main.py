@@ -15,11 +15,17 @@ my_thread = threading.Thread()
 
 @app.route('/')
 def index():
-	return render_template('index.html')
+	return render_template('index.html', light_state=light_state)
 
 @app.route('/get_status')
 def get_status():
-	return json.dumps({"data":light_state})
+	col = "amber"
+	if(light_state == 0):
+		col = "red"
+	elif(light_state == 2):
+		col = "green"
+
+	return json.dumps({"state":light_state})
 
 @app.route('/press_button', methods=['POST'])
 def press_button():
@@ -38,14 +44,15 @@ def switch_light():
 	print("switching")
 	global light_state
 	global my_thread
-	light_state = (light_state+1)%3 # change global variable
+	light_state = (light_state+1)%4 # change global variable
 	my_thread = threading.Timer(5.0, switch_light) # schedule next switch
 	my_thread.start()
 	socketio.emit('light_switched', {"data":light_state})
 
 @app.route('/debug')
 def debug():
-	return redirect(url_for("press_button"))
+	press_button()
+	return "ok"
 
 # -------------------------------------------------------------------
 

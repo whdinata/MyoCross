@@ -9,22 +9,47 @@
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script>
+        var lights = [];
         var socket = io(); // init connection
+
+        $( document ).ready(function() {
+          for(var i=1;i<=4;i++){
+            lights[i-1] = new Image();
+            lights[i-1].src = "/static/traffic-lights"+i+".jpg";
+          }
+          updateLights({{ light_state }});
+          hideInfo();
+        });
 
         socket.on('light_switched', function(data) {
           console.log("light_switched "+data["data"]);
+          updateLights(data["data"]);
+
         });
 
         socket.on('button_pressed', function(data) {
           console.log("button_pressed "+data["data"]);
+          $("#info").show();
+          setTimeout(hideInfo);
+          updateLights(data["data"])
         });
+
+        function updateLights(num){
+          $("#lights_img").attr('src', lights[num].src);
+          console.log("updated to "+lights[num].src);
+        }
+
+        function hideInfo(){
+          $("#info").hide();
+        }
+
     </script>
 
   </head>
 
   <body style="text-align: center;">
     <br />
-    <img style="height: 500px;" src="{{ url_for('static', filename='traffic-lights.jpg') }}">
-    <h3 style="display: none;">Button pressed</h3>
+    <img id="lights_img" style="height: 500px;" src="/static/traffic-lights1.jpg">
+    <h3 id="info">Button pressed</h3>
   </body>
 </html>
