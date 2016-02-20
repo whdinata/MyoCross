@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "universityofedinburgh.myocross"
-        minSdkVersion 15
+        minSdkVersion 18
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -19,7 +19,21 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'libs'
+    }
+}
+
 dependencies {
+    repositories {
+        maven {
+            // this must point to the myorepository distributed with the Myo SDK
+            url 'libs/myorepository'
+        }
+    }
+
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
@@ -27,4 +41,5 @@ dependencies {
     compile 'com.estimote:sdk:0.9.4@aar'
     compile 'com.parse.bolts:bolts-android:1.+'
     compile 'com.parse:parse-android:1.+'
+    compile 'com.thalmic:myosdk:0.10.+@aar'
 }

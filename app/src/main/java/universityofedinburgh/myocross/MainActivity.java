@@ -1,17 +1,29 @@
 package universityofedinburgh.myocross;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.thalmic.myo.AbstractDeviceListener;
+import com.thalmic.myo.DeviceListener;
+import com.thalmic.myo.Hub;
+import com.thalmic.myo.Myo;
+import com.thalmic.myo.Pose;
+import com.thalmic.myo.scanner.ScanActivity;
 
 import com.estimote.sdk.SystemRequirementsChecker;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = MainActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +40,41 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        Hub hub = Hub.getInstance();
+        if (!hub.init(this, getPackageName())) {
+            Log.e(TAG, "Could not initialize the Hub.");
+            finish();
+            return;
+        }
+
+        Hub.getInstance().setLockingPolicy(Hub.LockingPolicy.NONE);
+
+        DeviceListener mListener = new AbstractDeviceListener() {
+            @Override
+            public void onConnect(Myo myo, long timestamp) {
+                Toast.makeText(MainActivity.this, "Myo Connected!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onDisconnect(Myo myo, long timestamp) {
+                Toast.makeText(MainActivity.this, "Myo Disconnected!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onPose(Myo myo, long timestamp, Pose pose) {
+                Toast.makeText(MainActivity.this, "Pose: " + pose, Toast.LENGTH_SHORT).show();
+
+                //TODO: Do something awesome.
+            }
+        };
+
+        Hub.getInstance().addListener(mListener);
+
+
+        Intent intent = new Intent(this, ScanActivity.class);
+        startActivity(intent);
+        //Hub.getInstance().attachToAdjacentMyo();
     }
 
     @Override
