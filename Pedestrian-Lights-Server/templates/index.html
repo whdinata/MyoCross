@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Traffic light</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/clock_assets/flipclock.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <script type="text/javascript" src="/static/clock_assets/flipclock.js"></script>
+    <script>
+        var lights = [];
+        var socket = io(); // init connection
+        var timeLimit = 0;
+        var interval = null;
+        var clock = null;
+
+        $( document ).ready(function() {
+          for(var i=1;i<=2;i++){
+            lights[i-1] = new Image();
+            lights[i-1].src = "/static/lights"+i+".png";
+          }
+          updateLights({{ light_state }});
+          hideInfo();
+          clock = $('.clock-builder-output').FlipClock(10, {
+            clockFace: 'Counter',
+            countdown: true
+          });
+        });
+
+        socket.on('button_pressed', function(data) {
+          console.log("button_pressed "+data["data"]);
+          $("#info").show();
+          timeLimit = data["time"];
+          clock.setTime(timeLimit);
+          updateLights(data["data"]);
+          clearInterval(interval); 
+          interval = null;
+          interval = setInterval(updateCountdown, 1000);
+        });
+
+        function updateCountdown(){
+          timeLimit -= 1;
+          if(timeLimit == 0){
+            clearInterval(interval);
+            interval = null;
+            hideInfo();
+            updateLights(0);
+          }
+          clock.decrement();
+        }
+
+        function updateLights(num){
+          $("#lights_img").attr('src', lights[num].src);
+          console.log("updated to "+lights[num].src);
+        }
+
+        function hideInfo(){
+          $("#info").hide();
+        }
+
+    </script>
+
+  </head>
+
+  <body style="text-align: center;background-color: #333333;">
+    <br />
+    <img id="lights_img" style="height: 500px;" src="/static/lights1.png">
+    <div style="position:absolute; left: 100px; top:50px;" id="info">
+      <div class="clock-builder-output"></div>
+    </div>
+  </body>
+</html>
