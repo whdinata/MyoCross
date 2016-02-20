@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class Request {
 
-    public static Result post(String myurl, Map params) throws IOException, JSONException {
+    public static int post(String myurl, Map params) throws IOException, JSONException {
         InputStream is = null;
         // Only display the first 500 characters of the retrieved
         // web page content.
@@ -60,11 +60,10 @@ public class Request {
             wr.close();
             // Starts the query
             conn.connect();
-            int response = conn.getResponseCode();
-            Log.d("uoe", "The response is: " + response);
+//            Log.d("uoe", "The response is: " + response);
             is = conn.getInputStream();
 
-            return new Result(is);
+            return conn.getResponseCode();
 
             // Makes sure that the InputStream is closed after the app is
             // finished using it.

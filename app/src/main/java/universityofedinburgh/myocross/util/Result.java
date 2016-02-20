@@ -27,7 +27,7 @@ public class Result {
         }
         JSONObject json = new JSONObject(jsonresponse.toString());
         this.setStatus("success");
-        this.setMessage(json.getJSONArray("patients").getJSONObject(0).getString("name"));
+        this.setMessage(json.getString("state"));
     }
 
     public Result(String status, String message) {
