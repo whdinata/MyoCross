@@ -62,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        App.preferences = this.getSharedPreferences("universityofedinburgh.myocross", Context.MODE_PRIVATE);
+        App.host = App.preferences.getString(App.HOST_KEY, App.host);
+        App.url = App.host + App.CHECK;
+
         initView();
         initialiseMyo();
         mHandler = new Handler();
@@ -132,12 +136,14 @@ public class MainActivity extends AppCompatActivity {
         beaconManager.setMonitoringListener(new BeaconManager.MonitoringListener() {
             @Override
             public void onEnteredRegion(Region region, List<Beacon> list) {
-                new BgTask().execute();
+                startRepeatingTask();
             }
 
             @Override
             public void onExitedRegion(Region region) {
-                showNotification("Out of Range", "You are out of range!");
+                tvLabel.setText(R.string.label_no_traffic);
+                imageView.setImageResource(R.drawable.ic_traffic);
+                stopRepeatingTask();
             }
         });
 
@@ -150,8 +156,6 @@ public class MainActivity extends AppCompatActivity {
                         36593, 63260));
             }
         });
-
-        startRepeatingTask();
     }
 
     Runnable mStatusChecker = new Runnable() {
@@ -189,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            App.showServerSettings(MainActivity.this);
             return true;
         }
 
@@ -230,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Result doInBackground(Void... params) {
             try {
-                return Request.get("https://b6f7c094.ngrok.io/get_status");
+                return Request.get(App.url);
             } catch (IOException e) {
                 return new Result("400", "Unable to retrieve web page. URL may be invalid.");
             } catch (JSONException e) {
@@ -268,6 +273,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            myo.vibrate(Myo.VibrationType.SHORT);
             loadingDialog.setCancelable(false);
         }
 
@@ -277,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 // The map can be used later as the POST parameters
                 Map map = new HashMap();
-                int responseCode = Request.post("https://b6f7c094.ngrok.io/press_button", map);
+                int responseCode = Request.post(App.host + App.PRESS_BUTTON, map);
                 return new Result(String.valueOf(responseCode), "Button pressed!");
             } catch (IOException e) {
                 return new Result("400", "Unable to retrieve web page. URL may be invalid.");
@@ -295,7 +301,6 @@ public class MainActivity extends AppCompatActivity {
                 // Everything is okay
                 // showNotification("Success", result.getMessage()); // Just a different kind of notification
                 Toast.makeText(MainActivity.this, result.getMessage(), Toast.LENGTH_SHORT).show();
-                myo.vibrate(Myo.VibrationType.SHORT);
             } else {
                 showNotification("Error", result.getMessage());
             }
