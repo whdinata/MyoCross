@@ -23,6 +23,7 @@
             lights[i-1].src = "/static/lights"+i+".png";
           }
           updateLights({{ light_state }});
+          $("#lights_img").css('height', (($(document).height()*9)/10)+"px");
           hideInfo();
           clock = $('.clock-builder-output').FlipClock(10, {
             clockFace: 'Counter',
