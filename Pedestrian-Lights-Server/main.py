@@ -29,7 +29,7 @@ def press_button():
 	global my_thread
 	
 	if(light_state == 1):
-		return
+		return "OK"
 		
 	# restart timer
 	if(my_thread != None):
