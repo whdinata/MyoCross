@@ -25,7 +25,9 @@ We didn't have a physical Pedestrian control box - so we had to create a server 
 
 We would like to make people involved in city councils around the country aware of this project. We would love to see a real world implementation. We believe that this system could help many people with visual impairment and make their lives significantly easier...
 
-## Built With: Android, Myo, jQuery, JavaScript, Python, Flask, Estimote, Beacon, WebSockets
+## Built With
+
+Android, Myo, jQuery, JavaScript, Python, Flask, Estimote, Beacon, WebSockets
 
 ## Screenshots
 
