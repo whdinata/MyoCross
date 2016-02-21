@@ -38,6 +38,7 @@ def press_button():
 	my_thread.start()
 	light_state = 1 # green
 	socketio.emit('button_pressed', {"data":light_state, "time":green_duration})
+	return "OK"
 
 
 def switch_light(): 
